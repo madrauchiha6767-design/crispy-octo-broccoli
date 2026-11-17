@@ -1,4 +1,4 @@
-ppackage org.godotengine.plugin.android.template
+
 
 import android.app.*
 import android.content.*
