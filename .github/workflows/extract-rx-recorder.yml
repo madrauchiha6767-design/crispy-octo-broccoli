@@ -1,38 +1,41 @@
-name: Extract RX Recorder
+name: Build RX Recorder AAR
 
 on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  extract:
+  build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract project ZIP
-        run: |
-          set -e
-          unzip -q -o RXRecorder-fixed-project.zip -d /tmp/rx
-          cp -a /tmp/rx/rx-recorder-fixed/. .
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
 
-          rm -f .github/workflows/build-android-plugin.yml
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
 
-          rm -rf "AndroidManifest.xmlplugin"
-          rm -rf "GodotAndroidPlugin.kt plugin"
-          rm -rf "Screenrecordservice.kt plugin"
-          rm -rf "build.gradle.ktsplugin"
+      - name: Install Android SDK 36
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
 
-          rm -f AndroidManifest.xml
-          rm -f GodotAndroidPlugin.kt
-          rm -f ScreenRecordService.kt
-          rm -f export_plugin.gd
-          rm -f plugin.cfg
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "Fix RX Recorder project structure"
-          git push origin HEAD:main
+      - name: Build RX Recorder
+        run: gradle --no-daemon :plugin:assembleDebug :plugin:assembleRelease
+
+      - name: Upload AAR files
+        uses: actions/upload-artifact@v4
+        with:
+          name: RXRecorder-AAR
+          path: plugin/build/outputs/aar/*.aar
+          if-no-files-found: error
