@@ -14,9 +14,12 @@ jobs:
 
       - name: Extract project ZIP
         run: |
+          set -e
           unzip -q -o RXRecorder-fixed-project.zip -d /tmp/rx
+          cp -a /tmp/rx/rx-recorder-fixed/. .
+
           rm -f .github/workflows/build-android-plugin.yml
-                         
+
           rm -rf "AndroidManifest.xmlplugin"
           rm -rf "GodotAndroidPlugin.kt plugin"
           rm -rf "Screenrecordservice.kt plugin"
