@@ -1,0 +1,35 @@
+name: Extract RX Recorder
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          unzip -q -o RXRecorder-fixed-project.zip -d /tmp/rx
+          cp -a /tmp/rx/rx-recorder-fixed/. .
+
+          rm -rf "AndroidManifest.xmlplugin"
+          rm -rf "GodotAndroidPlugin.kt plugin"
+          rm -rf "Screenrecordservice.kt plugin"
+          rm -rf "build.gradle.ktsplugin"
+
+          rm -f AndroidManifest.xml
+          rm -f GodotAndroidPlugin.kt
+          rm -f ScreenRecordService.kt
+          rm -f export_plugin.gd
+          rm -f plugin.cfg
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Fix RX Recorder project structure"
+          git push origin HEAD:main
